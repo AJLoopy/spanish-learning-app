@@ -1,0 +1,33 @@
+{
+  "id": ".",
+  "name": "Spanish Learning App",
+  "short_name": "Spanish",
+  "description": "Daily Argentine Spanish practice with voseo, listening, vocabulary, and speaking exercises.",
+  "lang": "en",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f8f7",
+  "theme_color": "#123a50",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
