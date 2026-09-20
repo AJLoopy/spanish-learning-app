@@ -3,7 +3,7 @@
   "name": "Spanish Learning App",
   "short_name": "Spanish",
   "description": "Daily Argentine Spanish practice with voseo, listening, vocabulary, and speaking exercises.",
-  "lang": "en",
+  "lang": "es",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
