@@ -115,7 +115,11 @@
     @media(max-width:820px){.shell{width:min(100% - 22px,680px);padding-top:12px}.hero{grid-template-columns:1fr}.hero-copy{padding:28px 22px}.hero-visual{min-height:210px;order:-1}.hero-visual:after{background:linear-gradient(0deg,var(--navy),transparent 48%)}.workspace{grid-template-columns:1fr}.rail{position:static}.step-list{grid-template-columns:repeat(3,minmax(0,1fr))}.step-btn{grid-template-columns:28px 1fr;padding:8px}.step-time{display:none}.timer{display:flex;justify-content:space-between;align-items:center}.timer-controls{margin:0}.lesson-head{align-items:start}.flash-grid{grid-template-columns:1fr}}
     @media(max-width:520px){.topline{align-items:flex-end}.day-control{display:grid;gap:3px;flex:1}.install-link{font-size:.78rem}.hero{min-height:0}.hero-visual{min-height:185px}h1{font-size:2.55rem}.hero p{font-size:.95rem}.workspace{gap:20px}.step-list{grid-template-columns:repeat(2,minmax(0,1fr))}.step-btn{font-size:.84rem}.options{grid-template-columns:1fr}.card{padding:18px}.lesson-head{display:block}.time-badge{display:inline-block;margin-top:10px}.audio-row{align-items:flex-start;flex-direction:column}.lesson-nav{position:sticky;bottom:8px;z-index:5}.nav-btn{box-shadow:0 6px 18px rgba(0,0,0,.1)}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.record-btn.recording{animation:none}}
-  </style>
+  .dict-row{display:flex;gap:.5rem;margin-top:.6rem}
+    .dict-input{flex:1;min-width:0;padding:.65rem .7rem;border:1px solid var(--line);border-radius:8px;font-size:1rem;background:var(--paper);color:var(--ink)}
+    .score-line{margin:.9rem 0;font-weight:700}
+    #examTimer{font-variant-numeric:tabular-nums}
+    </style>
 </head>
 <body>
   <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol><symbol id="i-stop" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></symbol><symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V22h2v-3.08A7 7 0 0 0 19 12z"/></symbol></svg>
@@ -223,14 +227,175 @@
       grammar:[["Say: ‘Tell it again.’","Contala de nuevo.",["Cuéntala de nuevo.","Contala de nuevo.","La contás de nuevo."]],["Tell a friend: ‘Remember that night.’","Acordate de esa noche.",["Acuérdate de esa noche.","Acordate de esa noche.","Te acordás de esa noche."]],["Say: ‘Repeat that part.’","Repetí esa parte.",["Repite esa parte.","Repetí esa parte.","Repetís esa parte."]]],
       listenQ:["What caused the first surprise in the story?","A sudden power outage."],tip:"In arregló, trill the rr and stress the final syllable: a-rre-GLÓ. Let the ending land firmly.",build:["De golpe","se cortó la luz,","pero al toque","la arreglamos."],model:"De golpe se cortó la luz, pero al toque la arreglamos."}
   ];
-  const sections=[{name:"Calentá",time:"3 min"},{name:"Voseo lab",time:"4 min"},{name:"Lunfardo",time:"4 min"},{name:"Escuchá",time:"4 min"},{name:"Hablá",time:"5 min"},{name:"Mini escena",time:"bonus"}];
+  const sections=[{name:"Calentá",time:"3 min"},{name:"Voseo lab",time:"4 min"},{name:"Lunfardo",time:"4 min"},{name:"Escuchá",time:"4 min"},{name:"Hablá",time:"5 min"},{name:"Dictado",time:"5 min"},{name:"Oído fino",time:"4 min"},{name:"Prueba oral",time:"5 min"},{name:"Mini escena",time:"bonus"},{name:"Examen",time:"3 min"}];
+
+  /* ================= v2: dictation bank, listening MCQ, oral test, timed exams ================= */
+  const DICTADO=[
+  {t:"Che, ¿qué hacés? ¿Tomamos un café?",en:"Hey, what are you doing? Want to grab a coffee?",tip:"ha-CÉS — stress the last syllable. That's the voseo signature sound.",near:["Che, ¿qué haces? ¿Tomamos un café?","Che, ¿qué hacés? ¿Tomemos un café?"]},
+  {t:"Dale, nos vemos a la salida del subte.",en:"Okay, see you at the subway exit.",tip:"Dale = okay / deal. Subte = the Buenos Aires subway.",near:["Dale, nos vemos en la salida del subte.","Vale, nos vemos a la salida del subte."]},
+  {t:"Este bondi me deja en la puerta del laburo.",en:"This bus drops me right at work's door.",tip:"Bondi = bus, laburo = work. Everyday porteño nouns.",near:["Este bondi me lleva a la puerta del laburo.","Este colectivo me deja en la puerta del laburo."]},
+  {t:"¿Cuánta guita necesitás para el asado?",en:"How much money do you need for the barbecue?",tip:"Guita = money (lunfardo). ne-ce-si-TÁS, stress the end.",near:["¿Cuánta guita necesitas para el asado?","¿Cuánta plata necesitás para el asado?"]},
+  {t:"No te preocupes, yo te aviso cuando llegue.",en:"Don't worry, I'll let you know when I arrive.",tip:"Keep it smooth and even — reassuring, not rushed.",near:["No te preocupes, yo te aviso al llegar.","No te preocupés, yo te aviso cuando llegue."]},
+  {t:"El pibe de la vuelta vende las mejores medialunas.",en:"The kid around the corner sells the best medialunas.",tip:"Pibe = kid / dude. La vuelta = around the corner.",near:["El pibe de la esquina vende las mejores medialunas.","El chico de la vuelta vende las mejores medialunas."]},
+  {t:"Mirá el cielo, se viene una tormenta terrible.",en:"Look at the sky, a terrible storm is coming.",tip:"mi-RÁ — voseo command, stress the last syllable.",near:["Mira el cielo, se viene una tormenta terrible.","Mirá el cielo, viene una tormenta terrible."]},
+  {t:"¿Me bancás un toque? Ya casi termino.",en:"Can you give me a sec? I'm almost done.",tip:"Bancar = to cover for someone / wait. Un toque = a moment.",near:["¿Me bancas un toque? Ya casi termino.","¿Me esperás un toque? Ya casi termino."]},
+  {t:"Ayer hubo un quilombo bárbaro en el centro.",en:"Yesterday there was a huge mess downtown.",tip:"Quilombo = mess / chaos. Bárbaro = huge.",near:["Ayer había un quilombo bárbaro en el centro.","Ayer hubo un lío bárbaro en el centro."]},
+  {t:"Pasame la SUBE que no tengo saldo.",en:"Hand me the SUBE card, I'm out of credit.",tip:"pa-SA-me — voseo command. SUBE = the transit card.",near:["Pásame la SUBE que no tengo saldo.","Pasame la SUBE porque no tengo saldo."]},
+  {t:"¿Querés que te acompañe hasta tu casa?",en:"Do you want me to walk you home?",tip:"que-RÉS — let the final syllable land.",near:["¿Quieres que te acompañe hasta tu casa?","¿Querés que te acompañe a tu casa?"]},
+  {t:"La mina de al lado labura en una peluquería.",en:"The woman next door works at a hair salon.",tip:"Mina = woman (lunfardo, friendly). Laburar = to work.",near:["La chica de al lado labura en una peluquería.","La mina de al lado trabaja en una peluquería."]},
+  {t:"Che, boludo, no sabés lo que me pasó.",en:"Dude, you won't believe what happened to me.",tip:"Boludo = dude (warm among friends). sa-BÉS, final stress.",near:["Che, boludo, no sabes lo que me pasó.","Che, amigo, no sabés lo que me pasó."]},
+  {t:"Compramos morfi y miramos la peli en casa.",en:"We get food and watch the movie at home.",tip:"Morfi = food. Peli = movie (clipped slang).",near:["Compramos comida y miramos la peli en casa.","Compramos morfi para mirar la peli en casa."]},
+  {t:"Decime la posta, ¿te copó la fiesta?",en:"Tell me honestly, did you enjoy the party?",tip:"de-CI-me — voseo command. La posta = the truth.",near:["Dime la posta, ¿te copó la fiesta?","Decime la verdad, ¿te copó la fiesta?"]},
+  {t:"El tren viene lleno, viajamos como ganado.",en:"The train is coming packed, we're traveling like cattle.",tip:"Lleno with porteño ll → 'sh': SHE-no.",near:["El tren está lleno, viajamos como ganado.","El subte viene lleno, viajamos como ganado."]},
+  {t:"Ni en pedo salgo con esta lluvia.",en:"No way I'm going out in this rain.",tip:"Ni en pedo = no way (strong slang). Lluvia → SHU-via.",near:["Ni loco salgo con esta lluvia.","Ni en pedo salgo bajo esta lluvia."]},
+  {t:"¿Trajiste el cargador? Me quedé sin batería.",en:"Did you bring the charger? My battery died.",tip:"Rise on 'cargador', fall at the end — natural question curve.",near:["¿Trajiste el cargador? Se me acabó la batería.","¿Me trajiste el cargador? Me quedé sin batería."]},
+  {t:"Zafamos de la tormenta por un pelito.",en:"We dodged the storm by a hair.",tip:"Zafar = to dodge / get off the hook. Por un pelito = barely.",near:["Zafamos de la tormenta por poco.","Nos salvamos de la tormenta por un pelito."]},
+  {t:"Mañana a la mañana tengo turno en el dentista.",en:"Tomorrow morning I have a dentist appointment.",tip:"A la mañana = in the morning (Argentine usage).",near:["Mañana por la mañana tengo turno en el dentista.","Mañana a la mañana tengo cita en el dentista."]}
+  ];
+  function pickN(arr,n){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a.slice(0,Math.min(n,a.length))}
+  function dictIdx(d){return String(DICTADO.indexOf(d)+1).padStart(2,'0')}
+  function mcOpts(correct,pool){return pickN([correct,...pickN(pool.filter(x=>x!==correct),2)],3)}
+  /* ---- progress: unlock next session only by passing its exam ---- */
+  const V2KEY='spanishApp.v2';
+  function v2get(){try{return JSON.parse(localStorage.getItem(V2KEY)||'{}')}catch(e){return{}}}
+  function v2set(v){try{localStorage.setItem(V2KEY,JSON.stringify(v))}catch(e){}}
+  function unlockedMax(){const s=v2get();return Math.min(13,Math.max(0,+s.unlocked||0))}
+  function bestFor(d){const s=v2get();return (s.best&&s.best[d])||0}
+  function applyLocks(){const um=unlockedMax();document.querySelectorAll('#daySelect option').forEach(o=>{const i=+o.value;const base=o.textContent.replace(/ 🔒$/,'');if(i>um){o.disabled=true;o.textContent=base+' 🔒'}else{o.disabled=false;o.textContent=base}})}
+  function navFor(i){return `<div class="lesson-nav">${i?'<button class="nav-btn" id="prev" type="button">← Back</button>':'<span></span>'}<button class="nav-btn primary" id="next" type="button">${i===9?'Finish session':'Next →'}</button></div>`}
+  /* ---- Dictado: hear it, type it ---- */
+  function dictadoHTML(){
+    const cards=pickN(DICTADO,5).map((d,k)=>{const n=dictIdx(d);return `<article class="card" data-t="${safe(d.t)}"><h3>Dictado ${k+1} — escuchá y escribí</h3><div class="audio-row"><button class="audio-btn" data-src="assets/dictado-${n}.mp3" type="button"><svg><use href="#i-play"></use></svg><span>Escuchá</span></button><span class="listen-line">Type exactly what you hear. 80% word match passes.</span></div><div class="dict-row"><input class="dict-input" type="text" placeholder="Escribí lo que escuchaste…" autocomplete="off" autocapitalize="off"><button class="small-btn dict-check" type="button">Check</button></div><p class="feedback" aria-live="polite"></p></article>`}).join('');
+    return `<div class="lesson active"><div class="lesson-head"><div><h2>Dictado</h2><p>A porteño voice says a sentence. Type exactly what you hear — accents don't matter, words do.</p></div><span class="time-badge">5 min</span></div><div class="stack">${cards}</div><div class="score-line" id="dictScore"></div>${navFor(5)}</div>`;
+  }
+  /* ---- Oído fino: hear it, pick the EXACT sentence ---- */
+  function oidoHTML(){
+    const cards=pickN(DICTADO,5).map((d,k)=>{const n=dictIdx(d);const other=pickN(DICTADO.filter(x=>x!==d),1)[0];const opts=pickN([d.t,...d.near,other.t],4);
+    return `<article class="card oido-card" data-answer="${safe(d.t)}"><h3>Oído fino ${k+1} — ¿qué dijo exactamente?</h3><div class="audio-row"><button class="audio-btn" data-src="assets/dictado-${n}.mp3" type="button"><svg><use href="#i-play"></use></svg><span>Escuchá</span></button><span class="listen-line">Pick the EXACT sentence. Watch the verb forms.</span></div><div class="options">${opts.map(o=>`<button class="option" type="button">${safe(o)}</button>`).join('')}</div><p class="feedback" aria-live="polite"></p></article>`}).join('');
+    return `<div class="lesson active"><div class="lesson-head"><div><h2>Oído fino</h2><p>Same voice, four lookalike sentences. Only one is exactly what you heard — voseo vs tuteo is the usual trap.</p></div><span class="time-badge">4 min</span></div><div class="stack">${cards}</div><div class="score-line" id="oidoScore"></div>${navFor(6)}</div>`;
+  }
+  /* ---- Prueba oral: speak it, pass/fail ---- */
+  function oralHTML(){
+    const cards=pickN(DICTADO,5).map((d,k)=>{const n=dictIdx(d);
+    return `<article class="card" data-t="${safe(d.t)}"><h3>Prueba oral ${k+1}</h3><p class="prompt">${safe(d.t)}</p><p class="listen-line">${safe(d.en)}</p><div class="audio-row"><button class="audio-btn" data-src="assets/dictado-${n}.mp3" type="button"><svg><use href="#i-play"></use></svg><span>Hear model</span></button></div><div class="tip"><span class="tip-mark">//</span><p><strong>Pronunciation cue</strong><br>${safe(d.tip)}</p></div><button class="record-btn oral-rec" type="button"><svg><use href="#i-mic"></use></svg><span>Speak now</span></button><p class="feedback" aria-live="polite"></p></article>`}).join('');
+    return `<div class="lesson active"><div class="lesson-head"><div><h2>Prueba oral</h2><p>Say each sentence with porteño pronunciation. 78%+ word match passes — get 4 of 5 to pass the test.</p></div><span class="time-badge">5 min</span></div><div class="stack">${cards}</div><div class="score-line" id="oralScore"></div><button class="nav-btn primary" id="oralResult" type="button">See my result</button>${navFor(7)}</div>`;
+  }
+  function oralAttempt(btn){
+    const card=btn.closest('.card'),target=card.dataset.t,fb=card.querySelector('.feedback'),label=btn.querySelector('span');
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){fb.textContent='Speech recognition is not supported in this browser.';return}
+    btn.disabled=true;label.textContent='Listening… speak now';
+    const rec=new SR();rec.lang='es-AR';rec.interimResults=false;let settled=false;
+    rec.onresult=e=>{settled=true;const heard=e.results[0][0].transcript;const score=similarity(heard,target);const ok=score>=0.78;card.dataset.done=ok?'1':'0';
+      fb.innerHTML=(ok?'✅ <strong>Pass.</strong> ':'❌ <strong>Not yet.</strong> ')+'Heard: “'+safe(heard)+'”<br>Word match: '+Math.round(score*100)+'% — target: “'+safe(target)+'”';
+      label.textContent='Try again';btn.disabled=false;updateOralScore()};
+    rec.onerror=()=>{if(!settled){fb.textContent='Could not hear you — check the microphone permission and try again.';label.textContent='Speak now';btn.disabled=false}};
+    rec.onend=()=>{if(!settled){label.textContent='Speak now';btn.disabled=false}};
+    try{rec.start()}catch(e){label.textContent='Speak now';btn.disabled=false}
+  }
+  function oralVerdict(){
+    const cards=[...document.querySelectorAll('.oral-rec')].map(b=>b.closest('.card'));
+    const done=cards.filter(c=>c.dataset.done),ok=done.filter(c=>c.dataset.done==='1').length,box=$('#oralScore');
+    if(!box)return;
+    if(!done.length){box.textContent='Speak at least one sentence first.';return}
+    box.innerHTML=ok>=4?`✅ <strong>APROBADO — ${ok}/${done.length}.</strong> Your porteño is landing.`:`❌ <strong>${ok}/${done.length}.</strong> You need 4 of 5 — replay the model and try again.`;
+  }
+  function updateDictScore(){const cards=[...document.querySelectorAll('.dict-check')].map(b=>b.closest('.card'));const done=cards.filter(c=>c.dataset.done);const el=$('#dictScore');if(!el)return;el.textContent=done.length?`Dictado: ${done.filter(c=>c.dataset.done==='1').length}/${done.length} correct`:''}
+  function updateOidoScore(){const cards=[...document.querySelectorAll('.oido-card')];const done=cards.filter(c=>c.dataset.done);const el=$('#oidoScore');if(!el)return;el.textContent=done.length?`Oído fino: ${done.filter(c=>c.dataset.done==='1').length}/${done.length} correct`:''}
+  function updateOralScore(){const cards=[...document.querySelectorAll('.oral-rec')].map(b=>b.closest('.card'));const done=cards.filter(c=>c.dataset.done);const el=$('#oralScore');if(!el)return;el.textContent=done.length?`Prueba oral: ${done.filter(c=>c.dataset.done==='1').length}/${done.length} passed`:''}
+  /* ---- Examen: timed, 80% to pass, unlocks the next session ---- */
+  let examTimerId=null,examSecs=0,examQs=[];
+  function stopExamTimer(){if(examTimerId){clearInterval(examTimerId);examTimerId=null}}
+  function examenHTML(){
+    const best=bestFor(day);
+    return `<div class="lesson active"><div class="lesson-head"><div><h2>Examen</h2><p>10 questions · 90 seconds · 80% to pass. Passing unlocks the next session.</p></div><span class="time-badge">3 min</span></div><article class="card"><h3>Session ${day+1} exam</h3><p>Dictation, sharp listening, voseo and lunfardo — everything from this session plus the porteño bank.</p><p class="listen-line">Best score so far: ${best}%${best>=80?' ✅':''}</p><button class="nav-btn primary" id="examStart" type="button">Start timed exam</button><p class="feedback" id="examIntro"></p></article><div id="examBody"></div>${navFor(9)}</div>`;
+  }
+  function examQHTML(q,k){
+    if(q.kind==='dict'){const n=dictIdx(q.d);
+      return `<article class="card exam-q" data-k="${k}"><h3>${k+1}. Dictado</h3><div class="audio-row"><button class="audio-btn" data-src="assets/dictado-${n}.mp3" type="button"><svg><use href="#i-play"></use></svg><span>Escuchá</span></button></div><div class="dict-row"><input class="dict-input" type="text" placeholder="Escribí lo que escuchaste…" autocomplete="off" autocapitalize="off"><button class="small-btn exam-dict-check" type="button">Check</button></div><p class="feedback" aria-live="polite"></p></article>`}
+    if(q.kind==='oido'){const n=dictIdx(q.d);const other=pickN(DICTADO.filter(x=>x!==q.d),1)[0];const opts=pickN([q.d.t,...q.d.near,other.t],4);
+      return `<article class="card exam-oido exam-q" data-k="${k}" data-answer="${safe(q.d.t)}"><h3>${k+1}. ¿Qué dijo exactamente?</h3><div class="audio-row"><button class="audio-btn" data-src="assets/dictado-${n}.mp3" type="button"><svg><use href="#i-play"></use></svg><span>Escuchá</span></button></div><div class="options">${opts.map(o=>`<button class="option" type="button">${safe(o)}</button>`).join('')}</div><p class="feedback" aria-live="polite"></p></article>`}
+    return `<article class="card exam-mc exam-q" data-k="${k}" data-answer="${safe(q.answer)}"><h3>${k+1}. ${safe(q.prompt)}</h3><div class="options">${q.opts.map(o=>`<button class="option" type="button">${safe(o)}</button>`).join('')}</div><p class="feedback" aria-live="polite"></p></article>`;
+  }
+  function startExam(){
+    stopExamTimer();
+    const l=lessons[day];examQs=[];
+    pickN(DICTADO,3).forEach(d=>examQs.push({kind:'dict',d}));
+    pickN(DICTADO.filter(x=>!examQs.some(q=>q.d===x)),3).forEach(d=>examQs.push({kind:'oido',d}));
+    pickN(l.grammar,2).forEach(g=>examQs.push({kind:'mc',prompt:g[0],answer:g[1],opts:pickN(g[2],3)}));
+    pickN(l.vocab,2).forEach(v=>examQs.push({kind:'mc',prompt:'What does “'+v[0]+'” mean?',answer:v[1],opts:mcOpts(v[1],l.vocab.map(x=>x[1]))}));
+    examQs=pickN(examQs,10);
+    const body=$('#examBody');
+    body.innerHTML=`<div class="lesson-head"><div><h2>Answer all 10 — the clock is running</h2></div><span class="time-badge" id="examTimer">01:30</span></div><div class="stack">`+examQs.map((q,k)=>examQHTML(q,k)).join('')+`</div><button class="nav-btn primary" id="examFinish" type="button">Finish exam</button><p class="feedback" id="examResult" aria-live="polite"></p>`;
+    bindExamCards();
+    $('#examFinish').onclick=()=>finishExam(false);
+    const st=$('#examStart');if(st)st.disabled=true;
+    examSecs=90;paintExamTimer();
+    examTimerId=setInterval(()=>{examSecs--;paintExamTimer();if(examSecs<=0)finishExam(true)},1000);
+    body.scrollIntoView({behavior:'smooth'});
+  }
+  function paintExamTimer(){const t=$('#examTimer');if(t){const s=Math.max(0,examSecs);t.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}}
+  function bindExamCards(){
+    document.querySelectorAll('#examBody .audio-btn').forEach(b=>b.onclick=()=>playAudio(b));
+    document.querySelectorAll('#examBody .exam-oido, #examBody .exam-mc').forEach(q=>q.querySelectorAll('.option').forEach(b=>b.onclick=()=>{
+      q.querySelectorAll('.option').forEach(x=>x.disabled=true);
+      const ok=b.textContent.trim()===q.dataset.answer;
+      b.classList.add(ok?'correct':'wrong');
+      if(!ok){const right=[...q.querySelectorAll('.option')].find(x=>x.textContent.trim()===q.dataset.answer);if(right)right.classList.add('correct')}
+      q.dataset.done=ok?'1':'0';
+    }));
+    document.querySelectorAll('.exam-dict-check').forEach(b=>b.onclick=()=>{
+      const card=b.closest('.card'),k=+card.dataset.k,q=examQs[k],input=card.querySelector('.dict-input');
+      const score=similarity(input.value,q.d.t),ok=score>=0.8;card.dataset.done=ok?'1':'0';
+      card.querySelector('.feedback').innerHTML=(ok?'✅ ':'❌ ')+'Word match: '+Math.round(score*100)+'%'+(ok?'':' — correct: “'+safe(q.d.t)+'”');
+      input.disabled=true;b.disabled=true;
+    });
+  }
+  function finishExam(timeout){
+    stopExamTimer();
+    const cards=[...document.querySelectorAll('#examBody .exam-q')];
+    if(!cards.length)return;
+    const ok=cards.filter(c=>c.dataset.done==='1').length,pct=Math.round(ok/cards.length*100),pass=pct>=80;
+    const s=v2get();s.best=s.best||{};if(pct>(s.best[day]||0))s.best[day]=pct;
+    if(pass)s.unlocked=Math.max(+s.unlocked||0,Math.min(13,day+1));
+    v2set(s);applyLocks();
+    const box=$('#examResult');if(!box)return;
+    box.innerHTML=(pass?`✅ <strong>APROBASTE con ${pct}% (${ok}/${cards.length}).</strong> `:`❌ <strong>${pct}% (${ok}/${cards.length}) — necesitás 80%.</strong> Repasá la sesión e intentá de nuevo. `)+
+      (pass?(day<13?`Session ${day+2} unlocked. <button class="small-btn" id="goNext" type="button">Go to Session ${day+2} →</button>`:`¡Completaste las 14 sesiones! 🎉`):'')+
+      (timeout?` <span style="color:var(--muted)">(time ran out)</span>`:'');
+    const gn=$('#goNext');if(gn)gn.onclick=()=>{day=Math.min(13,day+1);$('#daySelect').value=day;section=0;stopAudio();stopRecording();render()};
+    box.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+  /* ---- wire the new sections into the existing binder ---- */
+  function bindExtras(){
+    document.querySelectorAll('.dict-check').forEach(b=>b.onclick=()=>{
+      const card=b.closest('.card'),input=card.querySelector('.dict-input'),target=card.dataset.t;
+      const score=similarity(input.value,target),ok=score>=0.8;card.dataset.done=ok?'1':'0';
+      card.querySelector('.feedback').innerHTML=(ok?'✅ <strong>Bien.</strong> ':'❌ <strong>Casi.</strong> Correct: “'+safe(target)+'” ')+'Word match: '+Math.round(score*100)+'%';
+      input.disabled=true;b.disabled=true;updateDictScore();
+    });
+    document.querySelectorAll('.oido-card').forEach(q=>q.querySelectorAll('.option').forEach(b=>b.onclick=()=>{
+      q.querySelectorAll('.option').forEach(x=>x.disabled=true);
+      const ok=b.textContent.trim()===q.dataset.answer;
+      b.classList.add(ok?'correct':'wrong');
+      if(!ok){const right=[...q.querySelectorAll('.option')].find(x=>x.textContent.trim()===q.dataset.answer);if(right)right.classList.add('correct')}
+      q.querySelector('.feedback').textContent=ok?'Bien — exact match.':'Not quite — replay it and compare the verb forms.';
+      q.dataset.done=ok?'1':'0';updateOidoScore();
+    }));
+    document.querySelectorAll('.oral-rec').forEach(b=>b.onclick=()=>oralAttempt(b));
+    const ov=$('#oralResult');if(ov)ov.onclick=oralVerdict;
+    const st=$('#examStart');if(st)st.onclick=startExam;
+  }
+  /* ================= end v2 ================= */
+
   let day=0, section=0, seconds=1200, timerId=null, currentAudio=null, recorder=null, chunks=[], micStream=null, recognition=null, deferredInstallPrompt=null;
   const $=s=>document.querySelector(s);
   const safe=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   function init(){
     lessons.forEach((l,i)=>{$('#daySelect').insertAdjacentHTML('beforeend',`<option value="${i}">Session ${i+1} · ${l.title}</option>`)});
-    const recommended=new Date().getDay(); day=(recommended+6)%7; $('#daySelect').value=day;
-    $('#daySelect').addEventListener('change',e=>{day=+e.target.value;section=0;stopAudio();stopRecording();render()});
+    applyLocks();
+    const recommended=new Date().getDay(); day=Math.min((recommended+6)%7,unlockedMax()); $('#daySelect').value=day;
+    $('#daySelect').addEventListener('change',e=>{day=+e.target.value;section=0;stopAudio();stopRecording();stopExamTimer();render()});
     $('#installBtn').onclick=handleInstall; $('#closeInstall').onclick=()=>$('#installDialog').close();
     updateInstallControl(); setTimeout(updateInstallControl,900);
     $('#timerToggle').onclick=toggleTimer; $('#timerReset').onclick=resetTimer; render();
@@ -269,30 +434,34 @@
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;updateInstallControl()});
   window.addEventListener('appinstalled',()=>{$('#installBtn').hidden=true;deferredInstallPrompt=null});
   function render(){
-    const l=lessons[day]; $('#sessionLabel').textContent=`SESSION ${day+1} · ${l.title.toUpperCase()}`; $('#heroText').textContent=`${l.scene} ${l.goal}`;
+    const l=lessons[day]; $('#sessionLabel').textContent=`SESSION ${day+1} · ${l.title.toUpperCase()}`;$('#sessionLabel').textContent+=` · EXAM BEST ${bestFor(day)}%`; $('#heroText').textContent=`${l.scene} ${l.goal}`;
     $('#stepList').innerHTML=sections.map((s,i)=>`<li><button class="step-btn ${i===section?'active':''}" data-step="${i}" type="button"><span class="step-num">${i+1}</span><span class="step-name">${s.name}</span><span class="step-time">${s.time}</span></button></li>`).join('');
     document.querySelectorAll('.step-btn').forEach(b=>b.onclick=()=>go(+b.dataset.step));
     $('#lessonContent').innerHTML=sectionHTML(section,l); bindSection();
   }
   function sectionHTML(i,l){
-    const nav=`<div class="lesson-nav">${i?'<button class="nav-btn" id="prev" type="button">← Back</button>':'<span></span>'}<button class="nav-btn primary" id="next" type="button">${i===5?'Finish session':'Next →'}</button></div>`;
+    const nav=`<div class="lesson-nav">${i?'<button class="nav-btn" id="prev" type="button">← Back</button>':'<span></span>'}<button class="nav-btn primary" id="next" type="button">${i===9?'Finish session':'Next →'}</button></div>`;
     if(i===0)return `<div class="lesson active"><div class="lesson-head"><div><h2>Calentá el oído</h2><p>Read each line aloud before revealing the meaning. Aim for sense, not word-for-word translation.</p></div><span class="time-badge">3 min</span></div><div class="stack">${l.phrases.map((p,k)=>`<article class="card"><p class="prompt">${p[0]}</p><button class="reveal" data-reveal="t${k}" type="button">Reveal meaning</button><p class="translation" id="t${k}" hidden>${p[1]}</p></article>`).join('')}</div>${nav}</div>`;
     if(i===1)return `<div class="lesson active"><div class="lesson-head"><div><h2>Voseo lab</h2><p>Choose the form you’d most naturally hear in Argentina.</p></div><span class="time-badge">4 min</span></div><div class="stack">${l.grammar.map((q,k)=>`<article class="card quiz" data-answer="${safe(q[1])}"><h3>${q[0]}</h3><div class="options">${q[2].map(o=>`<button class="option" type="button">${o}</button>`).join('')}</div><p class="feedback" aria-live="polite"></p></article>`).join('')}</div>${nav}</div>`;
     if(i===2)return `<div class="lesson active"><div class="lesson-head"><div><h2>Lunfardo, en contexto</h2><p>Flip the cards, say the word, then make a sentence of your own.</p></div><span class="time-badge">4 min</span></div><div class="flash-grid">${l.vocab.map(v=>`<button class="flash" type="button"><span class="word">${v[0]}</span><br><span class="tag">${v[2]}</span><span class="meaning" hidden><strong>${v[1]}</strong><br>Try it in your own sentence.</span></button>`).join('')}</div>${nav}</div>`;
     if(i===3)return `<div class="lesson active"><div class="lesson-head"><div><h2>Escuchá</h2><p>First listen without reading. Replay, then open the transcript.</p></div><span class="time-badge">4 min</span></div><div class="stack">${l.phrases.map((p,k)=>`<article class="card"><h3>Clip ${k+1}</h3><div class="audio-row"><button class="audio-btn" data-src="assets/day${day+1}-${k+1}.mp3" type="button"><svg><use href="#i-play"></use></svg><span>Escuchá</span></button><span class="listen-line">Listen for the rhythm and final stress.</span></div><button class="reveal" data-reveal="s${k}" type="button">Show transcript</button><p class="translation" id="s${k}" hidden>${p[0]}<br><span style="color:var(--muted)">${p[1]}</span></p></article>`).join('')}<article class="card quiz" data-answer="${safe(l.listenQ[1])}"><h3>${l.listenQ[0]}</h3><div class="options"><button class="option" type="button">${l.listenQ[1]}</button><button class="option" type="button">Not enough information.</button></div><p class="feedback"></p></article></div>${nav}</div>`;
     if(i===4){const speakIndex=[0,0,2,0,2,0,1,1,2,1,0,0,1,2][day];return `<div class="lesson active"><div class="lesson-head"><div><h2>Hablá</h2><p>Listen, repeat, record, then compare your timing and stress.</p></div><span class="time-badge">5 min</span></div><article class="recorder"><p class="prompt" id="targetPhrase">${l.phrases[speakIndex][0]}</p><div class="audio-row"><button class="audio-btn" data-src="assets/day${day+1}-${speakIndex+1}.mp3" type="button"><svg><use href="#i-play"></use></svg><span>Hear model</span></button></div><div class="tip"><span class="tip-mark">//</span><p><strong>Pronunciation cue</strong><br>${l.tip}</p></div><div class="record-actions"><button class="record-btn" id="recordBtn" type="button"><svg><use href="#i-mic"></use></svg><span>Record yourself</span></button><button class="small-btn" id="playMine" type="button" hidden>Play mine</button></div><div class="meter"><span id="meterFill"></span></div><div class="record-status" id="recordStatus">Your browser will ask for microphone permission.</div><div class="coach-result" id="coachResult" hidden></div></article>${nav}</div>`;}
-    return `<div class="lesson active"><div class="lesson-head"><div><h2>Mini escena</h2><p>${l.scene} Build a natural answer, then compare it with the model.</p></div><span class="time-badge">bonus</span></div><article class="card scene"><p class="prompt">Your turn</p><div class="chip-bank">${l.build.map((c,k)=>`<button class="chip" data-index="${k}" type="button">${c}</button>`).join('')}</div><div class="build-line" id="buildLine"></div><div class="scene-actions"><button class="check-scene" id="checkScene" type="button">Check it</button><button class="reset-scene" id="resetScene" type="button">Reset</button></div><p class="feedback" id="sceneFeedback"></p></article><div class="finish"><h2>¡Listo por hoy!</h2><p>You worked across meaning, structure, listening, and your own voice. Pick another session any time—or come back tomorrow for the recommended one.</p><button class="nav-btn primary" id="restart" type="button">Practice again</button><div class="reset-note">No progress is saved. This session resets when the page closes or reloads.</div></div>${nav}</div>`;
+    if(i===5)return dictadoHTML();
+    if(i===6)return oidoHTML();
+    if(i===7)return oralHTML();
+    if(i===8)return `<div class="lesson active"><div class="lesson-head"><div><h2>Mini escena</h2><p>${l.scene} Build a natural answer, then compare it with the model.</p></div><span class="time-badge">bonus</span></div><article class="card scene"><p class="prompt">Your turn</p><div class="chip-bank">${l.build.map((c,k)=>`<button class="chip" data-index="${k}" type="button">${c}</button>`).join('')}</div><div class="build-line" id="buildLine"></div><div class="scene-actions"><button class="check-scene" id="checkScene" type="button">Check it</button><button class="reset-scene" id="resetScene" type="button">Reset</button></div><p class="feedback" id="sceneFeedback"></p></article><div class="finish"><h2>¡Listo por hoy!</h2><p>You worked across meaning, structure, listening, and your own voice. Pick another session any time—or come back tomorrow for the recommended one.</p><button class="nav-btn primary" id="restart" type="button">Practice again</button><div class="reset-note">No progress is saved. This session resets when the page closes or reloads.</div></div>${nav}</div>`;
+    return examenHTML();
   }
   function bindSection(){
     document.querySelectorAll('[data-reveal]').forEach(b=>b.onclick=()=>{const el=document.getElementById(b.dataset.reveal);el.hidden=!el.hidden;b.textContent=el.hidden?(b.dataset.reveal[0]==='s'?'Show transcript':'Reveal meaning'):'Hide'});
     document.querySelectorAll('.quiz').forEach(q=>q.querySelectorAll('.option').forEach(b=>b.onclick=()=>{q.querySelectorAll('.option').forEach(x=>x.disabled=true);const ok=b.textContent.trim()===q.dataset.answer;b.classList.add(ok?'correct':'wrong');if(!ok)[...q.querySelectorAll('.option')].find(x=>x.textContent.trim()===q.dataset.answer)?.classList.add('correct');q.querySelector('.feedback').textContent=ok?'Bien — that’s the Argentine form.':'Not quite. Notice where the written accent moves the stress.'}));
     document.querySelectorAll('.flash').forEach(f=>f.onclick=()=>{f.classList.toggle('open');f.querySelector('.meaning').hidden=!f.classList.contains('open')});
     document.querySelectorAll('.audio-btn').forEach(b=>b.onclick=()=>playAudio(b));
-    $('#prev')&&($('#prev').onclick=()=>go(section-1)); $('#next')&&($('#next').onclick=()=>go(section===5?0:section+1)); $('#restart')&&($('#restart').onclick=()=>go(0));
+    $('#prev')&&($('#prev').onclick=()=>go(section-1)); $('#next')&&($('#next').onclick=()=>go(section===9?0:section+1)); $('#restart')&&($('#restart').onclick=()=>go(0));bindExtras();
     if($('#recordBtn'))$('#recordBtn').onclick=toggleRecording;
     if($('#buildLine')){document.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{if(c.classList.contains('used'))return;c.classList.add('used');const s=document.createElement('span');s.className='chip';s.textContent=c.textContent;s.dataset.source=c.dataset.index;s.onclick=()=>{document.querySelector(`.chip-bank .chip[data-index="${s.dataset.source}"]`).classList.remove('used');s.remove()};$('#buildLine').appendChild(s)});$('#resetScene').onclick=resetScene;$('#checkScene').onclick=()=>{$('#sceneFeedback').textContent=`Model: ${lessons[day].model}`}};
   }
-  function go(i){stopAudio();stopRecording();section=i;render();window.scrollTo({top:document.querySelector('.workspace').offsetTop-10,behavior:'smooth'})}
+  function go(i){stopAudio();stopRecording();stopExamTimer();section=i;render();window.scrollTo({top:document.querySelector('.workspace').offsetTop-10,behavior:'smooth'})}
   function playAudio(btn){
     if(currentAudio){currentAudio.audio.pause();currentAudio.btn.classList.remove('playing');currentAudio.btn.querySelector('span').textContent=currentAudio.label;if(currentAudio.btn===btn){currentAudio=null;return}}
     const audio=new Audio(btn.dataset.src),label=btn.querySelector('span').textContent;currentAudio={audio,btn,label};btn.classList.add('playing');btn.querySelector('span').textContent='Playing…';audio.play().catch(()=>{btn.querySelector('span').textContent='Tap to retry';btn.classList.remove('playing')});audio.onended=()=>{btn.classList.remove('playing');btn.querySelector('span').textContent=label;currentAudio=null}
